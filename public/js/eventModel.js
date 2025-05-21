@@ -39,7 +39,7 @@ export async function emailExistCheck(email) {
             }
         } else {
             // Handle server errors
-            return { success: false, message: 'Server error: ' + (data.message || 'Unknown error') };
+            return { success: false, message: 'Server error: ' + (data.message || 'Unknown error.') };
         }
     } catch (err) {
         // Handle any network or fetch errors

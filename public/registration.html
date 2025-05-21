@@ -16,10 +16,12 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required placeholder="Enter your password">
 
-            <button type="submit">Submit</button>
+            <button class="submitRegister" type="submit">Submit</button>
         </form>
+        <p id="error_msg"></p>
     </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="module">
         // Calling events file
         import {insertUser, emailExistCheck} from "./js/eventModel.js";
@@ -27,6 +29,14 @@
             // Prevent the form from submitting immediately
             event.preventDefault();
 
+             // Show loading indicator
+            const submitButton = document.querySelector('.submitRegister');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Loading...';
+
+            // Optional: artificial delay (e.g., 2.5 seconds)
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            
             // Create FormData object from the form
             const formData = new FormData(this);
             const email = formData.get('email');
@@ -35,16 +45,44 @@
                 if (result.success) {
                     const userAdd = await insertUser(formData)
                     if (userAdd.success) {
-                        alert(userAdd.message);
+                        errorCall(userAdd.message)
                     }
                 } else {
-                    alert(result.message);
+                    errorCall(result.message)
                 }
             } else {
-                alert('Email is not exist.');
-            }
-            location.reload();           
+                errorCall('Something went wrong.')
+            }   
+            
+            // Re-enable button after process completes
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit'; // or your original button text
         });
+       const errorCall = (errorMsg) => {
+            const errorBox = document.getElementById('error_msg');
+            
+            if (!errorBox) {
+                console.error("Element with ID 'error_msg' not found.");
+                return;
+            }
+
+            errorBox.innerText = errorMsg;
+            errorBox.style.display = 'block';
+            errorBox.style.opacity = 1;
+            errorBox.style.transition = 'opacity 0.4s ease';
+
+            // Clear any previous timeouts
+            if (errorBox._fadeTimeout) clearTimeout(errorBox._fadeTimeout);
+            if (errorBox._hideTimeout) clearTimeout(errorBox._hideTimeout);
+
+            errorBox._fadeTimeout = setTimeout(() => {
+                errorBox.style.opacity = 0;
+
+                errorBox._hideTimeout = setTimeout(() => {
+                    errorBox.style.display = 'none';
+                }, 400);
+            }, 2000);
+        };
     </script>
 </body>
 </html>
